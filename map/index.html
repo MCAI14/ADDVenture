@@ -10,11 +10,113 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="../firebase-config.js"></script>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background: #e9e7e2;
+    }
+    .map-border {
+      margin: 30px auto;
+      background: #fff;
+      border: 8px solid #aaa;
+      border-radius: 18px;
+      box-shadow: 0 0 24px #8884;
+      width: 1100px;
+      height: 700px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .top-bar {
+      height: 48px;
+      background: #f3f3f3;
+      border-bottom: 2px solid #ccc;
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      font-weight: bold;
+      font-size: 1.1em;
+      justify-content: space-between;
+    }
+    .players-list {
+      position: absolute;
+      left: 18px;
+      top: 70px;
+      width: 160px;
+      background: #f7f7f7cc;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px #0001;
+      padding: 10px;
+      z-index: 10;
+    }
+    .map-area {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    #map {
+      position: absolute;
+      left: 0; top: 0; right: 0; bottom: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    .bottom-bar {
+      height: 60px;
+      background: #f3f3f3;
+      border-top: 2px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 0 18px;
+    }
+    .game-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      border: none;
+      background: #e0e7ef;
+      margin: 0 4px;
+      font-size: 1.5em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .game-btn:hover {
+      background: #bcd4f6;
+    }
+    @media (max-width: 1200px) {
+      .map-border { width: 98vw; height: 70vw; min-height: 400px; }
+      .players-list { left: 2vw; }
+    }
+  </style>
 </head>
 <body>
-  <div id="game">
-    <h1>Bem-vindo ao ADDVenture!</h1>
-    <div id="map"></div>
+  <div class="map-border">
+    <div class="top-bar">
+      <span>ADDVenture - Mapa</span>
+      <span id="user-info"></span>
+    </div>
+    <div class="players-list">
+      <strong>Jogadores</strong>
+      <ul id="players">
+        <li>Jogador 1</li>
+        <li>Jogador 2</li>
+        <!-- ... -->
+      </ul>
+    </div>
+    <div class="map-area">
+      <div id="map"></div>
+    </div>
+    <div class="bottom-bar">
+      <button class="game-btn" title="Mover"><span>🧭</span></button>
+      <button class="game-btn" title="Atacar"><span>⚔️</span></button>
+      <button class="game-btn" title="Defender"><span>🛡️</span></button>
+      <button class="game-btn" title="Construir"><span>🏰</span></button>
+      <button class="game-btn" title="Info"><span>ℹ️</span></button>
+      <!-- Adiciona mais botões conforme precisares -->
+    </div>
   </div>
   <script>
     // Verifica se o utilizador está autenticado
@@ -23,12 +125,57 @@
       if (!user) {
         window.location.href = "../index.html";
       } else {
-        // Inicializar o mapa só uma vez
+        document.getElementById('user-info').innerText = user.email;
         if (!window.map) {
-          window.map = L.map('map').setView([39.5, -8.0], 6);
+          window.map = L.map('map', {
+            minZoom: 5,
+            maxZoom: 8,
+            zoomControl: false
+          }).setView([39.5, -8.0], 6);
+
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
           }).addTo(window.map);
+
+          // Exemplo de regiões (ajusta as coordenadas para o teu desenho!)
+          const poletaOeste = L.polygon([
+            [39.9, -9.2],
+            [40.2, -8.8],
+            [40.1, -8.2],
+            [39.8, -8.3],
+            [39.7, -8.7]
+          ], {color: '#3388ff', fillOpacity: 0.15}).addTo(window.map).bindTooltip("POLETA OESTE", {permanent:true, direction:"center"});
+
+          const poletaCentral = L.polygon([
+            [40.2, -8.8],
+            [40.3, -8.2],
+            [40.0, -7.8],
+            [39.8, -8.3],
+            [40.1, -8.2]
+          ], {color: '#33ff88', fillOpacity: 0.15}).addTo(window.map).bindTooltip("POLETA CENTRAL", {permanent:true, direction:"center"});
+
+          const poletaEste = L.polygon([
+            [40.3, -8.2],
+            [40.5, -7.5],
+            [40.1, -7.2],
+            [40.0, -7.8]
+          ], {color: '#ff8833', fillOpacity: 0.15}).addTo(window.map).bindTooltip("POLETA ESTE", {permanent:true, direction:"center"});
+
+          const simburiaDoTempo = L.polygon([
+            [39.7, -8.1],
+            [39.9, -7.8],
+            [39.8, -7.5],
+            [39.6, -7.7]
+          ], {color: '#ff33aa', fillOpacity: 0.15}).addTo(window.map).bindTooltip("SIMBÚRIA DO TEMPO", {permanent:true, direction:"center"});
+
+          const suburbiaDoEspelho = L.polygon([
+            [39.9, -7.8],
+            [40.1, -7.5],
+            [39.8, -7.2],
+            [39.8, -7.5]
+          ], {color: '#33ffaa', fillOpacity: 0.15}).addTo(window.map).bindTooltip("SUBÚRBIA DO ESPELHO", {permanent:true, direction:"center"});
+
+          // Adiciona mais regiões conforme o teu desenho!
         }
       }
     });
