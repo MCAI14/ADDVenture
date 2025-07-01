@@ -128,54 +128,22 @@
         document.getElementById('user-info').innerText = user.email;
         if (!window.map) {
           window.map = L.map('map', {
-            minZoom: 5,
-            maxZoom: 8,
-            zoomControl: false
-          }).setView([39.5, -8.0], 6);
+            crs: L.CRS.Simple,
+            minZoom: -2,
+            maxZoom: 2,
+            zoomControl: true
+          });
 
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-          }).addTo(window.map);
+          // Define os bounds conforme o tamanho da imagem (1500x1000 px)
+          const bounds = [[0,0], [1500,1000]];
 
-          // Exemplo de regiões (ajusta as coordenadas para o teu desenho!)
-          const poletaOeste = L.polygon([
-            [39.9, -9.2],
-            [40.2, -8.8],
-            [40.1, -8.2],
-            [39.8, -8.3],
-            [39.7, -8.7]
-          ], {color: '#3388ff', fillOpacity: 0.15}).addTo(window.map).bindTooltip("POLETA OESTE", {permanent:true, direction:"center"});
+          // Adiciona a imagem como camada base
+          L.imageOverlay('meu-mapa.png', bounds).addTo(window.map);
 
-          const poletaCentral = L.polygon([
-            [40.2, -8.8],
-            [40.3, -8.2],
-            [40.0, -7.8],
-            [39.8, -8.3],
-            [40.1, -8.2]
-          ], {color: '#33ff88', fillOpacity: 0.15}).addTo(window.map).bindTooltip("POLETA CENTRAL", {permanent:true, direction:"center"});
-
-          const poletaEste = L.polygon([
-            [40.3, -8.2],
-            [40.5, -7.5],
-            [40.1, -7.2],
-            [40.0, -7.8]
-          ], {color: '#ff8833', fillOpacity: 0.15}).addTo(window.map).bindTooltip("POLETA ESTE", {permanent:true, direction:"center"});
-
-          const simburiaDoTempo = L.polygon([
-            [39.7, -8.1],
-            [39.9, -7.8],
-            [39.8, -7.5],
-            [39.6, -7.7]
-          ], {color: '#ff33aa', fillOpacity: 0.15}).addTo(window.map).bindTooltip("SIMBÚRIA DO TEMPO", {permanent:true, direction:"center"});
-
-          const suburbiaDoEspelho = L.polygon([
-            [39.9, -7.8],
-            [40.1, -7.5],
-            [39.8, -7.2],
-            [39.8, -7.5]
-          ], {color: '#33ffaa', fillOpacity: 0.15}).addTo(window.map).bindTooltip("SUBÚRBIA DO ESPELHO", {permanent:true, direction:"center"});
-
-          // Adiciona mais regiões conforme o teu desenho!
+          // Ajusta o mapa para mostrar toda a imagem
+          window.map.fitBounds(bounds);
+          window.map.setMaxBounds(bounds);
+          window.map.setMinZoom(window.map.getBoundsZoom(bounds));
         }
       }
     });
