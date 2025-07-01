@@ -44,6 +44,10 @@
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          sessionStorage.setItem('addventure_logged', '1');
+          window.location.href = "map/index.html";
+        })
         .catch(error => {
           document.getElementById('authError').innerText = error.message;
         });
@@ -62,9 +66,14 @@
       auth.signOut();
     };
 
+    // Remover o redirecionamento automático do onAuthStateChanged!
     auth.onAuthStateChanged(user => {
       if (user) {
-        window.location.href = "map/index.html";
+        // Apenas mostra o botão de logout, não redireciona!
+        document.getElementById('auth').style.display = 'none';
+        document.getElementById('game').style.display = 'block';
+        document.getElementById('logoutBtn').style.display = 'inline-block';
+        document.getElementById('authError').innerText = '';
       } else {
         document.getElementById('auth').style.display = 'block';
         document.getElementById('game').style.display = 'none';
