@@ -84,16 +84,6 @@
     </form>
   </div>
 
-  <!-- Interface de amigos -->
-  <div id="friendsPanel" style="display:none; margin: 30px auto; max-width: 400px;">
-    <h3>Amigos</h3>
-    <ul id="friendsList"></ul>
-    <h4>Pedidos de amizade</h4>
-    <ul id="requestsList"></ul>
-    <input type="email" id="friendEmail" placeholder="Email do amigo">
-    <button id="addFriendBtn" class="btn secondary">Enviar pedido</button>
-    <div id="friendError" class="auth-error"></div>
-  </div>
 
   <script>
   const auth = firebase.auth();
@@ -105,7 +95,7 @@
     auth.signInWithEmailAndPassword(email, password)
       .then(() => {
         sessionStorage.setItem('addventure_logged', '1');
-        window.location.href = "map/index.html";
+        window.location.href = "homeboard/index.html";
       })
       .catch(error => {
         document.getElementById('authError').innerText = error.message;
@@ -133,93 +123,18 @@
     auth.signOut();
   };
 
-  // Mostra/esconde o formulário, sem iniciar mapas!
+  // Mostra/esconde o formulário de autenticação
   auth.onAuthStateChanged(user => {
     if (user) {
       document.getElementById('auth').style.display = 'none';
       document.getElementById('logoutBtn').style.display = 'inline-block';
       document.getElementById('authError').innerText = '';
-      document.getElementById('friendsPanel').style.display = 'block';
-      carregarAmigos(user.uid);
-      carregarPedidos(user.uid);
     } else {
       document.getElementById('auth').style.display = 'block';
       document.getElementById('logoutBtn').style.display = 'none';
-      document.getElementById('friendsPanel').style.display = 'none';
     }
   });
 
-  // Função para enviar pedido de amizade
-  document.getElementById('addFriendBtn').onclick = async () => {
-    const email = document.getElementById('friendEmail').value;
-    document.getElementById('friendError').innerText = '';
-    if (!email) return;
-
-    // Procura o utilizador pelo email
-    const users = await db.collection("users").where("email", "==", email).get();
-    if (users.empty) {
-      document.getElementById('friendError').innerText = "Utilizador não encontrado!";
-      return;
-    }
-    const friendId = users.docs[0].id;
-    const user = auth.currentUser;
-    // Adiciona pedido de amizade ao utilizador destino
-    db.collection("users").doc(friendId).update({
-      pedidosAmizade: firebase.firestore.FieldValue.arrayUnion(user.uid)
-    }).then(() => {
-      document.getElementById('friendError').innerText = "Pedido enviado!";
-    });
-  };
-
-  // Carregar amigos
-  function carregarAmigos(uid) {
-    db.collection("users").doc(uid).get().then(doc => {
-      const amigos = doc.data().amigos || [];
-      const list = document.getElementById('friendsList');
-      list.innerHTML = "";
-      amigos.forEach(async friendId => {
-        const friendDoc = await db.collection("users").doc(friendId).get();
-        const friendEmail = friendDoc.exists ? friendDoc.data().email : "Desconhecido";
-        const li = document.createElement('li');
-        li.textContent = friendEmail;
-        list.appendChild(li);
-      });
-    });
-  }
-
-  // Carregar pedidos de amizade
-  function carregarPedidos(uid) {
-    db.collection("users").doc(uid).get().then(doc => {
-      const pedidos = doc.data().pedidosAmizade || [];
-      const list = document.getElementById('requestsList');
-      list.innerHTML = "";
-      pedidos.forEach(async friendId => {
-        const friendDoc = await db.collection("users").doc(friendId).get();
-        const friendEmail = friendDoc.exists ? friendDoc.data().email : "Desconhecido";
-        const li = document.createElement('li');
-        li.textContent = friendEmail + " ";
-        // Botão para aceitar pedido
-        const btn = document.createElement('button');
-        btn.textContent = "Aceitar";
-        btn.onclick = () => aceitarPedido(uid, friendId);
-        li.appendChild(btn);
-        list.appendChild(li);
-      });
-    });
-  }
-
-  // Aceitar pedido de amizade
-  function aceitarPedido(meuId, amigoId) {
-    db.collection("users").doc(meuId).update({
-      amigos: firebase.firestore.FieldValue.arrayUnion(amigoId),
-      pedidosAmizade: firebase.firestore.FieldValue.arrayRemove(amigoId)
-    });
-    db.collection("users").doc(amigoId).update({
-      amigos: firebase.firestore.FieldValue.arrayUnion(meuId)
-    });
-    carregarAmigos(meuId);
-    carregarPedidos(meuId);
-  }
   </script>
 </body>
 </html>
