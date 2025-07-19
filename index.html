@@ -2,6 +2,7 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ADDVenture - Conquista de Mapas</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -12,6 +13,57 @@
   <script src="firebase-config.js"></script>
   <script src="main.js" defer></script>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+  /* Estilos gerais */
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Estilos para o painel de amigos */
+  #friendsPanel {
+    margin: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  /* Estilos para dispositivos móveis */
+  @media (max-width: 600px) {
+    #friendsPanel {
+      margin: 10px;
+      padding: 5px;
+      font-size: 14px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 8px;
+    }
+    .button-group button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+    }
+  }
+
+  /* Estilos para dispositivos desktop */
+  @media (min-width: 601px) {
+    #friendsPanel {
+      margin: 30px auto;
+      max-width: 400px;
+    }
+    .input-group input {
+      width: auto;
+      padding: 10px;
+    }
+    .button-group button {
+      width: auto;
+      padding: 10px;
+      margin-top: 10px;
+    }
+  }
+  </style>
 </head>
 <body>
   <div id="auth" class="auth-container">
